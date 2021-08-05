@@ -5,8 +5,6 @@
   "version": "0.1",
   "description": "Marks notification (pengumuman) with read or highlight it",
   "permissions": [
-    "activeTab",
-    "scripting",
     "storage"
   ],
   "content_scripts":[
