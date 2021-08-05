@@ -39,10 +39,7 @@ function mark_as_read(){
     var read = result.read;
     if (read.includes(value)){
       // https://stackoverflow.com/questions/5767325/how-can-i-remove-a-specific-item-from-an-array
-      const index = read.indexOf(value);
-      if (index > -1) {
-        read.splice(index, 1);
-      }
+      read = read.filter(e => e !== value)
     } else {
       read.push(value);
     }
@@ -50,6 +47,8 @@ function mark_as_read(){
     chrome.storage.local.set({read: read}, function () {
       changeTextColor();
     });
+    
+    console.log(read);
   });
 }
 
@@ -64,10 +63,7 @@ function mark_as_highlight(){
     var highlight = result.highlight;
     if (highlight.includes(value)){
       // https://stackoverflow.com/questions/5767325/how-can-i-remove-a-specific-item-from-an-array
-      const index = highlight.indexOf(value);
-      if (index > -1) {
-        highlight.splice(index, 1);
-      }
+      highlight = highlight.filter(e => e !== value)
     } else {
       highlight.push(value);
     }
@@ -112,25 +108,21 @@ function initialize(){
   chrome.storage.local.get({read: [], highlight: []}, function (result) {
     var read = result.read;
     var highlight = result.highlight;
+    var newRead = [];
+    var newHighlight = [];
     for (readItem of read){
       if (!pengumuman_changed.includes(readItem)) {
-        const index = read.indexOf(readItem);
-        if (index > -1) {
-          read.splice(index, 1);
-        }
+        var newRead = read.filter(e => e !== readItem)
       }
     }
 
     for (highlightItem of highlight){
       if (!pengumuman_changed.includes(highlightItem)) {
-        const index = highlight.indexOf(highlightItem);
-        if (index > -1) {
-          highlight.splice(index, 1);
-        }
+        var newHighlight = highlight.filter(e => e !== highlightItem)
       }
     }
 
-    chrome.storage.local.set({read: read, highlight: highlight}, function () {});
+    chrome.storage.local.set({read: newRead, highlight: newHighlight}, function () {});
   });
 
   changeTextColor();
@@ -149,3 +141,5 @@ var observer = new MutationObserver(function(){
     }
 });
 observer.observe(targetNode, { attributes: true, childList: true });
+
+
