@@ -39,7 +39,7 @@ function mark_as_read(){
     var read = result.read;
     if (read.includes(value)){
       // https://stackoverflow.com/questions/5767325/how-can-i-remove-a-specific-item-from-an-array
-      read = read.filter(e => e !== value)
+      read = read.filter(item => item !== value)
     } else {
       read.push(value);
     }
@@ -48,8 +48,9 @@ function mark_as_read(){
       changeTextColor();
     });
     
-    console.log(read);
   });
+
+  
 }
 
 // Mark as highlighted
@@ -63,7 +64,7 @@ function mark_as_highlight(){
     var highlight = result.highlight;
     if (highlight.includes(value)){
       // https://stackoverflow.com/questions/5767325/how-can-i-remove-a-specific-item-from-an-array
-      highlight = highlight.filter(e => e !== value)
+      highlight = highlight.filter(item => item !== value)
     } else {
       highlight.push(value);
     }
@@ -72,66 +73,36 @@ function mark_as_highlight(){
       changeTextColor();
     });
   });
+  
 }
 
 function initialize(){
-  console.log("Initializing");
+  console.log("Studentportal Notification Marker Initializing");
   // Add the buttons
   const card_pengumumans = document.getElementsByClassName("card-pengumuman");
   for (card_pengumuman of card_pengumumans){
+    var judulPengumuman = card_pengumuman.getElementsByClassName("judulPengumuman")[0].innerHTML;
     var div = document.createElement("div");
     div.style.display = "flex";
     div.style.justifyContent = "space-between";
 
     var read = document.createElement("button");
-    read.value = stringToHash(card_pengumuman.getElementsByClassName("judulPengumuman")[0].innerHTML);
+    read.value = stringToHash(judulPengumuman);
     read.innerHTML = "✔️";
-    read.addEventListener("click", mark_as_read);
+    read.onclick = mark_as_read;
 
     var highlight = document.createElement("button");
-    highlight.value = stringToHash(card_pengumuman.getElementsByClassName("judulPengumuman")[0].innerHTML);
+    highlight.value = stringToHash(judulPengumuman);
     highlight.innerHTML = "💡";
-    highlight.addEventListener("click", mark_as_highlight);
+    highlight.onclick = mark_as_highlight;
 
     div.appendChild(read);
     div.appendChild(highlight);
     card_pengumuman.appendChild(div);
   }
 
-  // Clear read or highlight that isn't inside the pengumuman list
-  const pengumumans = document.getElementsByClassName("judulPengumuman");
-  var pengumuman_changed = [];
-  for (pengumuman of pengumumans){
-    pengumuman_changed.push(stringToHash(pengumuman))
-  }
-
-  chrome.storage.local.get({read: [], highlight: []}, function (result) {
-    var read = result.read;
-    var highlight = result.highlight;
-    var newRead = [];
-    var newHighlight = [];
-    for (readItem of read){
-      if (!pengumuman_changed.includes(readItem)) {
-        var newRead = read.filter(e => e !== readItem)
-      }
-    }
-
-    for (highlightItem of highlight){
-      if (!pengumuman_changed.includes(highlightItem)) {
-        var newHighlight = highlight.filter(e => e !== highlightItem)
-      }
-    }
-
-    chrome.storage.local.set({read: newRead, highlight: newHighlight}, function () {});
-  });
-
   changeTextColor();
 }
-
-window.addEventListener("message", (event) => {
-  console.log(event.data);
-  initialize();
-});
 
 // https://stackoverflow.com/questions/1462138/event-listener-for-when-element-becomes-visible
 var targetNode = document.getElementById('toggle-pengumuman');
