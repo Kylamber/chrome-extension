@@ -14,6 +14,6 @@
   }
 ],
   "background": {
-    "service_worker": "content.js"
+    "service_worker": "background.js"
   }
 }
