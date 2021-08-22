@@ -1,6 +1,8 @@
 {
-  "name": "Stupor Notification Marker",
-  "action": {},
+  "name": "Studentportal Notification Marker",
+  "action": {
+    "default_icon": "128.png"
+  },
   "manifest_version": 3,
   "version": "0.1",
   "description": "Marks notification (pengumuman) with read or highlight it",
