@@ -1,3 +1,6 @@
+/**
+ * Creates hash from string, https://www.geeksforgeeks.org/how-to-create-hash-from-string-in-javascript/
+ */
 function stringToHash(string) {              
   var hash = 0;
   if (string.length == 0) return hash;
@@ -9,10 +12,12 @@ function stringToHash(string) {
   return hash;
 }
 
+/**
+ * Changes the text for every card if they are marked
+ */
 function changeTextColor() {
   const pengumumans = document.getElementsByClassName("judulPengumuman");
 
-  // Read
   chrome.storage.local.get({read: [], highlight: []}, function (result) {
     var read = result.read;
     var highlight = result.highlight;
@@ -28,17 +33,20 @@ function changeTextColor() {
   });
 }
 
-// Mark as read
+/**
+ * Marks pengumuman as read
+ * Prevents pengumuman from being opened when clicking marking, button // https://stackoverflow.com/questions/17862228/button-onclick-inside-whole-clickable-div
+ * Storing an array with chrome.storage.local, // https://stackoverflow.com/questions/16605706/store-an-array-with-chrome-storage-local
+ * Removing specific item from an array, // https://stackoverflow.com/questions/5767325/how-can-i-remove-a-specific-item-from-an-array
+ */
 function mark_as_read(){
-  // https://stackoverflow.com/questions/17862228/button-onclick-inside-whole-clickable-div
   event.stopPropagation()
   const value = parseInt(this.getAttribute("value"));
 
-  // https://stackoverflow.com/questions/16605706/store-an-array-with-chrome-storage-local
   chrome.storage.local.get({read: []}, function (result) {
     var read = result.read;
     if (read.includes(value)){
-      // https://stackoverflow.com/questions/5767325/how-can-i-remove-a-specific-item-from-an-array
+      
       read = read.filter(item => item !== value)
     } else {
       read.push(value);
@@ -53,7 +61,10 @@ function mark_as_read(){
   
 }
 
-// Mark as highlighted
+/**
+ * Marks pengumuman as highlighted
+ * More information on the code can be seen in the "Marks pengumuman as read" function
+ */
 function mark_as_highlight(){
   event.stopPropagation()
   const value = parseInt(this.getAttribute("value"));
@@ -73,18 +84,25 @@ function mark_as_highlight(){
   
 }
 
+/**
+ * Clears all reads and highlights
+ */
 function clearLocalStorage(){
   if (confirm("Clear markers?")){
     chrome.storage.local.clear()
   }
   changeTextColor();
 }
-
+/**
+ * Initializes the Studentportal Notification Marker, 
+ */
 function initialize(){
   console.log("Studentportal Notification Marker Initializing");
-  // Add the buttons
-
-  // https://stackoverflow.com/questions/11371550/change-hover-css-properties-with-javascript
+  
+  /**
+   * Adding hover effect to all buttons with the scm-btn tag, https://stackoverflow.com/questions/11371550/change-hover-css-properties-with-javascript
+   * 
+   */
   var css = '.scm-btn:hover{ background-color: #BCBCBC }';
   var style = document.createElement('style');
   
@@ -96,7 +114,9 @@ function initialize(){
   
   document.getElementsByTagName('head')[0].appendChild(style);
 
-  // Trash can button to delete storage
+  /**
+   * Trash can button in the top row to clear reads and highlights.
+   */
   const rowpb2 = document.getElementsByClassName("row pb-2")[0];
   rowpb2.getElementsByTagName("div")[0].className = "col-8 float-right";
   var trashcan = document.createElement("button");
@@ -107,10 +127,16 @@ function initialize(){
   trashcan.onclick = clearLocalStorage;
   rowpb2.insertBefore(trashcan, rowpb2.firstChild);
 
+  /**
+   * Modify all pengumuman cards
+   */
   const card_pengumumans = document.getElementsByClassName("card-pengumuman");
+  var existing = [];
   for (card_pengumuman of card_pengumumans){
     var judulPengumuman = card_pengumuman.getElementsByClassName("judulPengumuman")[0].innerHTML;
-    
+
+    existing.push(stringToHash(judulPengumuman))
+
     var br = document.createElement("br");
     card_pengumuman.appendChild(br);
     
@@ -142,10 +168,34 @@ function initialize(){
     card_pengumuman.appendChild(div);
   }
 
+  /**
+   * Removes from read things that is nonexistent in the pengumuman
+   * Code for differences in array from https://stackoverflow.com/questions/1187518/how-to-get-the-difference-between-two-arrays-in-javascript
+   * Code for removing differences in array from https://stackoverflow.com/questions/7669555/javascript-remove-array-from-array
+   */
+  chrome.storage.local.get({read: [], highlight: []}, function (result) {
+    var read = result.read;
+    let difference = read.filter(x => !existing.includes(x));
+    read = read.filter(function(item) {
+      return difference.indexOf(item) === -1;
+    });
+
+    var highlight = result.highlight;
+    difference = highlight.filter(x => !existing.includes(x));
+    highlight = highlight.filter(function(item) {
+      return difference.indexOf(item) === -1;
+    });
+
+    chrome.storage.local.set({read: read, highlight: highlight}, function () {});
+    
+  });
+
   changeTextColor();
 }
 
-// https://stackoverflow.com/questions/1462138/event-listener-for-when-element-becomes-visible
+/**
+ * Observe changes when the #toggle-pengumuman button is clicked, https://stackoverflow.com/questions/1462138/event-listener-for-when-element-becomes-visible
+ */ 
 var targetNode = document.getElementById('toggle-pengumuman');
 var observer = new MutationObserver(function(){
     if(targetNode.style.visibility == 'hidden'){
